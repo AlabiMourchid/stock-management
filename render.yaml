@@ -1,0 +1,69 @@
+# ============================================================
+# render.yaml — Infrastructure as Code pour Render.com
+# Déploiement : Laravel 12 + PHP 8.2 + PostgreSQL
+# ============================================================
+
+services:
+  - type: web
+    name: amira-stock
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: APP_NAME
+        value: "Amira - Gestion Stock"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+
+      # Base de données — injectée depuis le service PostgreSQL ci-dessous
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: amira-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: amira-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: amira-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: amira-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: amira-db
+          property: password
+
+      # Session & Cache sur fichier (pas de Redis nécessaire)
+      - key: SESSION_DRIVER
+        value: file
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: CACHE_STORE
+        value: file
+
+      # Logs vers stderr (visibles dans le dashboard Render)
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+
+      # URL — sera mise à jour après le 1er déploiement
+      - key: APP_URL
+        value: https://amira-stock.onrender.com
+
+databases:
+  - name: amira-db
+    plan: free
+    databaseName: amira_stock
+    user: amira_user

@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
 
         // ---------- Utilisateurs ----------
         User::create(['name' => 'Admin',     'email' => 'admin@amira.com',     'password' => Hash::make('password'), 'role' => 'admin']);
-        User::create(['name' => 'Caissier Test',   'email' => 'caissier@amira.com',  'password' => Hash::make('password'), 'role' => 'caissier']);
+        //User::create(['name' => 'Caissier Test',   'email' => 'caissier@amira.com',  'password' => Hash::make('password'), 'role' => 'caissier']);
 
         // ---------- Catégories (inspirées du menu Amira) ----------
         $cats = [
@@ -34,34 +34,92 @@ class DatabaseSeeder extends Seeder
 
         // ---------- Produits (exemples calibrés menu Amira) ----------
         $menu = [
-            // Poulets rôtis
-            ['categorie_id' => 1, 'nom' => 'Poulet entier rôti', 'prix_vente' => 4500, 'ordre' => 1],
-            ['categorie_id' => 1, 'nom' => 'Demi-poulet rôti',    'prix_vente' => 2500, 'ordre' => 2],
-            ['categorie_id' => 1, 'nom' => 'Quart poulet rôti',    'prix_vente' => 1500, 'ordre' => 3],
-            ['categorie_id' => 1, 'nom' => 'Ailes de poulet (x6)', 'prix_vente' => 2000, 'ordre' => 4],
-            ['categorie_id' => 1, 'nom' => 'Cuisses de poulet (x2)', 'prix_vente' => 1800, 'ordre' => 5],
-            // Pépites & Snacks
-            ['categorie_id' => 2, 'nom' => 'Pépites de poulet',    'prix_vente' => 1500, 'ordre' => 1],
-            ['categorie_id' => 2, 'nom' => 'Burger poulet',         'prix_vente' => 2000, 'ordre' => 2],
-            ['categorie_id' => 2, 'nom' => 'Wrap poulet',          'prix_vente' => 1800, 'ordre' => 3],
-            ['categorie_id' => 2, 'nom' => 'Hot-dog poulet',      'prix_vente' => 1200, 'ordre' => 4],
+            // Entrées
+            ['categorie_id' => 1, 'nom' => 'Samoussa 5 pièces + sauce soja', 'prix_vente' => 2500, 'ordre' => 1],
+            ['categorie_id' => 1, 'nom' => 'Salade by Amira',    'prix_vente' => 3000, 'ordre' => 2],
+            ['categorie_id' => 1, 'nom' => 'Douceurs de alloco',    'prix_vente' => 2000, 'ordre' => 3],
+
+            // Entrées
+            ['categorie_id' => 2, 'nom' => 'Pilons braisé', 'prix_vente' => 3500, 'ordre' => 1],
+            ['categorie_id' => 2, 'nom' => 'Pilons braisé XL',    'prix_vente' => 4500, 'ordre' => 2],
+            ['categorie_id' => 2, 'nom' => 'Butter chicken',    'prix_vente' => 4000, 'ordre' => 3],
+            ['categorie_id' => 2, 'nom' => 'Butter chicken XL',    'prix_vente' => 6000, 'ordre' => 4],
+            ['categorie_id' => 2, 'nom' => 'Poulet Mayo',    'prix_vente' => 3500, 'ordre' => 5],
+            ['categorie_id' => 2, 'nom' => 'Poulet Mayo XL',    'prix_vente' => 5000, 'ordre' => 6],
+            ['categorie_id' => 2, 'nom' => 'Poulet Mayo XXL',    'prix_vente' => 7000, 'ordre' => 7],
+            ['categorie_id' => 2, 'nom' => 'Poulets frits',    'prix_vente' => 3000, 'ordre' => 8],
+            ['categorie_id' => 2, 'nom' => 'Poulets frits XL',    'prix_vente' => 4000, 'ordre' => 9],
+            ['categorie_id' => 2, 'nom' => 'Poulet Choukouya',    'prix_vente' => 3000, 'ordre' => 10],
+            ['categorie_id' => 2, 'nom' => 'Poulet Choukouya XL',    'prix_vente' => 4500, 'ordre' => 11],
+            ['categorie_id' => 2, 'nom' => 'Poulet Choukouya XXL',    'prix_vente' => 6000, 'ordre' => 12],
+            ['categorie_id' => 2, 'nom' => 'Poulets caramélisé',    'prix_vente' => 4000, 'ordre' => 13],
+            ['categorie_id' => 2, 'nom' => 'Poulets caramélisé XL',    'prix_vente' => 6000, 'ordre' => 14],
+
+            // Pépites
+            ['categorie_id' => 4, 'nom' => 'Les nouilles level 1',    'prix_vente' => 2500, 'ordre' => 1],
+            ['categorie_id' => 4, 'nom' => 'Les nouilles level 2',         'prix_vente' => 3500, 'ordre' => 2],
+            ['categorie_id' => 4, 'nom' => 'Les nouilles level 3',          'prix_vente' => 5000, 'ordre' => 3],
+            ['categorie_id' => 4, 'nom' => 'Piron rouge',      'prix_vente' => 3000, 'ordre' => 4],
+            ['categorie_id' => 4, 'nom' => 'Piron rouge XL',      'prix_vente' => 5000, 'ordre' => 5],
+            ['categorie_id' => 4, 'nom' => 'Macaroni au fromage',      'prix_vente' => 5000, 'ordre' => 6],
+            ['categorie_id' => 4, 'nom' => "Pizza d'alloco",      'prix_vente' => 10000, 'ordre' => 7],
+
+            // SNACKS
+            ['categorie_id' => 5, 'nom' => "Hamburger basique au poulet",      'prix_vente' => 2000, 'ordre' => 1],
+            ['categorie_id' => 5, 'nom' => "Plat de hamburger",      'prix_vente' => 3500, 'ordre' => 2],
+            ['categorie_id' => 5, 'nom' => "2 medi burger",      'prix_vente' => 2000, 'ordre' => 3],
+            ['categorie_id' => 5, 'nom' => "5 medi burger",      'prix_vente' => 4000, 'ordre' => 4],
+            ['categorie_id' => 5, 'nom' => "Sandwich basique au poulet",      'prix_vente' => 1500, 'ordre' => 5],
+            ['categorie_id' => 5, 'nom' => "Sandwich medium au poulet",      'prix_vente' => 2000, 'ordre' => 6],
+            ['categorie_id' => 5, 'nom' => "Sandwich chargé",      'prix_vente' => 3000, 'ordre' => 7],
+            ['categorie_id' => 5, 'nom' => "Sandwich chargé XL",      'prix_vente' => 4000, 'ordre' => 8],
+            ['categorie_id' => 5, 'nom' => "Sandwich Auriol",      'prix_vente' => 3000, 'ordre' => 9],
+            ['categorie_id' => 5, 'nom' => "Sandwich Auriol XL",      'prix_vente' => 4000, 'ordre' => 10],
+            ['categorie_id' => 5, 'nom' => "Shawarma poulet",      'prix_vente' => 2000, 'ordre' => 11],
+            ['categorie_id' => 5, 'nom' => "Shawarma poulet XL",      'prix_vente' => 3000, 'ordre' => 12],
+            ['categorie_id' => 5, 'nom' => "Tacos au poulet",      'prix_vente' => 3000, 'ordre' => 13],
+            ['categorie_id' => 5, 'nom' => "Tacos au poulet",      'prix_vente' => 4000, 'ordre' => 14],
             // Accompagnements
-            ['categorie_id' => 3, 'nom' => 'Frites',               'prix_vente' => 800,  'ordre' => 1],
-            ['categorie_id' => 3, 'nom' => 'Riz jollof',            'prix_vente' => 600,  'ordre' => 2],
-            ['categorie_id' => 3, 'nom' => 'Salade coleslaw',       'prix_vente' => 500,  'ordre' => 3],
-            ['categorie_id' => 3, 'nom' => 'Sauce piment',          'prix_vente' => 200,  'ordre' => 4],
-            ['categorie_id' => 3, 'nom' => 'Sauce mayo-ail',        'prix_vente' => 200,  'ordre' => 5],
+            ['categorie_id' => 3, 'nom' => 'Frites',               'prix_vente' => 1000,  'ordre' => 1],
+            ['categorie_id' => 3, 'nom' => 'Riz blanc ou gras',            'prix_vente' => 1000,  'ordre' => 2],
+            ['categorie_id' => 3, 'nom' => 'Alloco',       'prix_vente' => 1000,  'ordre' => 3],
+            ['categorie_id' => 3, 'nom' => 'Banane sautée',          'prix_vente' => 1000,  'ordre' => 4],
+            ['categorie_id' => 3, 'nom' => 'Attieke',        'prix_vente' => 1000,  'ordre' => 5],
+            ['categorie_id' => 3, 'nom' => 'Couscous au beurre',        'prix_vente' => 1000,  'ordre' => 6],
+            ['categorie_id' => 3, 'nom' => 'Pommes sautées',        'prix_vente' => 1000,  'ordre' => 7],
             // Boxes
-            ['categorie_id' => 4, 'nom' => 'Box Family (4 pers.)', 'prix_vente' => 12000,'ordre' => 1],
-            ['categorie_id' => 4, 'nom' => 'Box Duo',              'prix_vente' => 6000, 'ordre' => 2],
-            ['categorie_id' => 4, 'nom' => 'Box Solo',             'prix_vente' => 3500, 'ordre' => 3],
+            ['categorie_id' => 8, 'nom' => 'Box Solo', 'prix_vente' => 3600,'ordre' => 1],
+            ['categorie_id' => 8, 'nom' => 'Box Proteinée',              'prix_vente' => 7500, 'ordre' => 2],
+            ['categorie_id' => 8, 'nom' => 'Big box',             'prix_vente' => 5000, 'ordre' => 3],
+            ['categorie_id' => 8, 'nom' => 'Box Dosée', 'prix_vente' => 8000,'ordre' => 4],
+            ['categorie_id' => 8, 'nom' => 'Formule 1',              'prix_vente' => 9500, 'ordre' => 5],
+            ['categorie_id' => 8, 'nom' => 'Formule 2',             'prix_vente' => 11000, 'ordre' => 6],
             // Desserts
-            ['categorie_id' => 5, 'nom' => 'Beignets (x3)',         'prix_vente' => 600,  'ordre' => 1],
-            ['categorie_id' => 5, 'nom' => 'Banana bread',         'prix_vente' => 800,  'ordre' => 2],
+            ['categorie_id' => 6, 'nom' => 'Crêpes natures',         'prix_vente' => 1500,  'ordre' => 1],
+            ['categorie_id' => 6, 'nom' => 'Crêpes au chocolat',         'prix_vente' => 2000,  'ordre' => 2],
+            ['categorie_id' => 6, 'nom' => 'Crêpes au chocolat + glace',         'prix_vente' => 2500,  'ordre' => 3],
+            ['categorie_id' => 6, 'nom' => 'Crêpes nature + glace + banane',         'prix_vente' => 2500,  'ordre' => 4],
+            ['categorie_id' => 6, 'nom' => 'Mousse au chocolat',         'prix_vente' => 1000,  'ordre' => 5],
+            ['categorie_id' => 6, 'nom' => 'Bowl de Yaourt au Granola',         'prix_vente' => 2500,  'ordre' => 6],
+            ['categorie_id' => 6, 'nom' => 'Pain perdu + mousse au chocolat',         'prix_vente' => 2000,  'ordre' => 7],
             // Boissons
-            ['categorie_id' => 6, 'nom' => 'Bissap / Gingembre',   'prix_vente' => 500,  'ordre' => 1],
-            ['categorie_id' => 6, 'nom' => 'Eau minérale 50cl',     'prix_vente' => 300,  'ordre' => 2],
-            ['categorie_id' => 6, 'nom' => 'Jus naturel',           'prix_vente' => 700,  'ordre' => 3],
+            ['categorie_id' => 7, 'nom' => 'Carafe de bissap',   'prix_vente' => 1500,  'ordre' => 1],
+            ['categorie_id' => 7, 'nom' => 'Eau',     'prix_vente' => 1000,  'ordre' => 2],
+            ['categorie_id' => 7, 'nom' => 'Verre de bissap',           'prix_vente' => 500,  'ordre' => 3],
+            ['categorie_id' => 7, 'nom' => 'Bierre',   'prix_vente' => 1000,  'ordre' => 4],
+            ['categorie_id' => 7, 'nom' => 'Boissons gazeuses',     'prix_vente' => 1000,  'ordre' => 5],
+            ['categorie_id' => 7, 'nom' => 'Jus naturel',           'prix_vente' => 600,  'ordre' => 6],
+            ['categorie_id' => 7, 'nom' => 'Boissons chaude',   'prix_vente' => 1500,  'ordre' => 7],
+            ['categorie_id' => 7, 'nom' => 'Milkshake chocolat',     'prix_vente' => 3000,  'ordre' => 8],
+            ['categorie_id' => 7, 'nom' => 'Iced matcha latte',           'prix_vente' => 3000,  'ordre' => 9],
+            ['categorie_id' => 7, 'nom' => 'Iced latte / Iced capuccino',   'prix_vente' => 2000,  'ordre' => 10],
+            ['categorie_id' => 7, 'nom' => 'Milkshake chocolat alcoolisée',     'prix_vente' => 3000,  'ordre' => 11],
+            ['categorie_id' => 7, 'nom' => 'Protein shake',           'prix_vente' => 2000,  'ordre' => 12],
+            ['categorie_id' => 7, 'nom' => 'Blue Lagoon',   'prix_vente' => 2000,  'ordre' => 13],
+            ['categorie_id' => 7, 'nom' => 'Mojito',     'prix_vente' => 2000,  'ordre' => 14],
+            ['categorie_id' => 7, 'nom' => 'Sunset',           'prix_vente' => 2000,  'ordre' => 15],
+            ['categorie_id' => 7, 'nom' => 'Restsobre',   'prix_vente' => 1500,  'ordre' => 16],
+            ['categorie_id' => 7, 'nom' => 'Apple vodka',     'prix_vente' => 2000,  'ordre' => 17],
         ];
 
 
@@ -73,7 +131,7 @@ class DatabaseSeeder extends Seeder
         //  PRODUITS STOCK = Matières premières achetées
         //  Ce sont les éléments physiques gérés en inventaire
         // ================================================================
-        $stock = [
+        /*$stock = [
             // Viandes / Volailles
             ['nom' => 'Poulet entier cru',          'unite' => 'pièce', 'stock_actuel' => 15,  'seuil_critique' => 4,  'cout_unitaire' => 2800],
             ['nom' => 'Ailes de poulet cru (kg)',   'unite' => 'kg',    'stock_actuel' => 8,   'seuil_critique' => 2,  'cout_unitaire' => 1500],
@@ -103,6 +161,6 @@ class DatabaseSeeder extends Seeder
 
         foreach ($stock as $s) {
             Produit::create(array_merge(['actif' => true], $s));
-        }
+        }*/
     }
 }

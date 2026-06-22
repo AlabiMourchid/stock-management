@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -14,6 +15,26 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $recaptcha = $request->input('g-recaptcha-response');
+
+        if (!$recaptcha) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Veuillez compléter le reCAPTCHA.']);
+        }
+
+        $verify = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret'   => config('services.recaptcha.secret'),
+            'response' => $recaptcha,
+            'remoteip' => $request->ip(),
+        ]);
+
+        if (!$verify->json('success')) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'La vérification reCAPTCHA a échoué. Réessayez.']);
+        }
+
         $credentials = $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',

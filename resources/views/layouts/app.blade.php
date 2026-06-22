@@ -26,8 +26,7 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
         <div class="brand-text">
-            <span class="brand-name">Amira</span>
-            <span class="brand-sub">A.Fait.Le.Poulet</span>
+            <span class="brand-icon"><img src="/img/logo.png" class="img-fluid" alt=""></span>
         </div>
     </div>
 

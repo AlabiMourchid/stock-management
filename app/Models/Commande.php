@@ -9,7 +9,7 @@ class Commande extends Model
 {
     protected $fillable = [
         'user_id', 'numero', 'statut', 'type', 'mode_paiement',
-        'total_ttc', 'montant_recu', 'monnaie_rendue', 'notes', 'pret_a',
+        'total_ttc', 'supplement', 'montant_recu', 'monnaie_rendue', 'notes', 'pret_a',
     ];
 
     protected $casts = ['pret_a' => 'datetime'];

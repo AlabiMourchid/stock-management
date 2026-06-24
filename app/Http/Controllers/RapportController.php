@@ -15,19 +15,18 @@ class RapportController extends Controller
     {
         Gate::authorize('view-reports');
 
-        $periode = $request->periode ?? 'jour';
-        [$debut, $fin] = match($periode) {
-            'semaine' => [now()->startOfWeek()->toDateString(), now()->endOfWeek()->toDateString()],
-            'mois'    => [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()],
-            'annee'    => [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()],
-            default   => [today()->toDateString(), today()->toDateString()],
-        };
+        $debut = $request->date_debut ?? today()->toDateString();
+        $fin   = $request->date_fin   ?? today()->toDateString();
+
+        if ($fin < $debut) {
+            $fin = $debut;
+        }
 
         $topProduits = $this->stats->topProduits($debut . ' 00:00:00', $fin . ' 23:59:59');
         $evolution   = $this->stats->evolutionVentes7j();
         $caPeriode   = $this->stats->caPeriode($debut . ' 00:00:00', $fin . ' 23:59:59');
 
-        return view('rapports.index', compact('topProduits', 'evolution', 'caPeriode', 'periode', 'debut', 'fin'));
+        return view('rapports.index', compact('topProduits', 'evolution', 'caPeriode', 'debut', 'fin'));
     }
 
     public function pertes(Request $request)

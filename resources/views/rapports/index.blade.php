@@ -6,40 +6,46 @@
 @section('content')
 
     {{-- ===== Sélecteur de période ===== --}}
+    @php
+        $aujourdhui  = today()->toDateString();
+        $sc = [
+            'Aujourd\'hui' => [$aujourdhui, $aujourdhui],
+            '7 jours'      => [now()->subDays(6)->toDateString(), $aujourdhui],
+            'Ce mois'      => [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()],
+            'Cette année'  => [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()],
+        ];
+    @endphp
     <div class="card mb-4">
         <div class="card-body py-3">
+            {{-- Raccourcis --}}
+            <div class="d-flex flex-wrap gap-1 mb-3">
+                @foreach($sc as $label => [$d, $f])
+                    @php $actif = ($debut === $d && $fin === $f); @endphp
+                    <a href="{{ route('rapports.index', ['date_debut' => $d, 'date_fin' => $f]) }}"
+                       class="btn btn-sm {{ $actif ? 'btn-amira' : 'btn-outline-secondary' }}">
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </div>
+            {{-- Plage personnalisée --}}
             <form method="GET" class="row g-2 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label mb-1">Période</label>
-                    <div class="btn-group paiement-toggle" role="group">
-                        <input type="radio" class="btn-check" name="periode" id="p-jour"
-                               value="jour" {{ $periode === 'jour' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-secondary mx-2" for="p-jour">Aujourd'hui</label>
-
-                        <input type="radio" class="btn-check" name="periode" id="p-semaine"
-                               value="semaine" {{ $periode === 'semaine' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-secondary mx-2" for="p-semaine">Cette semaine</label>
-
-                        <input type="radio" class="btn-check" name="periode" id="p-mois"
-                               value="mois" {{ $periode === 'mois' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-secondary mx-2" for="p-mois">Ce mois</label>
-
-                        <input type="radio" class="btn-check" name="periode" id="p-annee"
-                               value="annee" {{ $periode === 'annee' ? 'checked' : '' }}>
-                        <label class="btn btn-outline-secondary mx-2" for="p-annee">Cette année</label>
-                    </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label mb-1">Du</label>
+                    <input type="date" name="date_debut" class="form-control form-control-sm"
+                           value="{{ $debut }}">
                 </div>
-                <div class="col-auto">
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label mb-1">Au</label>
+                    <input type="date" name="date_fin" class="form-control form-control-sm"
+                           value="{{ $fin }}">
+                </div>
+                <div class="col-auto d-flex gap-2">
                     <button type="submit" class="btn btn-amira btn-sm">
                         <i class="bi bi-search me-1"></i>Appliquer
                     </button>
-                </div>
-                <div class="col-auto ms-auto">
-                <span style="font-size:12px;color:var(--text-muted)">
-                    <i class="bi bi-calendar-range me-1"></i>
-                    Du {{ \Carbon\Carbon::parse($debut)->locale('fr')->isoFormat('D MMM YYYY') }}
-                    au {{ \Carbon\Carbon::parse($fin)->locale('fr')->isoFormat('D MMM YYYY') }}
-                </span>
+                    <a href="{{ route('rapports.index') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-x-lg me-1"></i> Annuler
+                    </a>
                 </div>
             </form>
         </div>
@@ -57,12 +63,11 @@
                             ->whereNotIn('statut', ['annule'])->where('mode_paiement', 'especes')->sum('total_ttc');
         $caMobile      = \App\Models\Commande::whereBetween('created_at', [$debut.' 00:00:00', $fin.' 23:59:59'])
                             ->whereNotIn('statut', ['annule'])->where('mode_paiement', 'mobile_money')->sum('total_ttc');
-        $caCarte       = \App\Models\Commande::whereBetween('created_at', [$debut.' 00:00:00', $fin.' 23:59:59'])
-                            ->whereNotIn('statut', ['annule'])->where('mode_paiement', 'carte')->sum('total_ttc');
+
     @endphp
 
     <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon orange"><i class="bi bi-currency-exchange"></i></div>
                 <div class="stat-info">
@@ -74,7 +79,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-xl-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon blue"><i class="bi bi-receipt-cutoff"></i></div>
                 <div class="stat-info">
@@ -83,7 +88,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-xl-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon green"><i class="bi bi-graph-up-arrow"></i></div>
                 <div class="stat-info">
@@ -95,7 +100,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-xl-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon amber"><i class="bi bi-phone"></i></div>
                 <div class="stat-info">
@@ -139,7 +144,6 @@
                         @foreach([
                             ['Espèces',      $caEspeces, '#16A34A'],
                             ['Mobile Money', $caMobile,  '#2563EB'],
-                            ['Carte',        $caCarte,   '#7C3AED'],
                         ] as [$label, $val, $color])
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-2">
@@ -290,15 +294,13 @@
         // ---- Donut répartition paiements ----
         const caEspeces = {{ $caEspeces }};
         const caMobile  = {{ $caMobile }};
-        const caCarte   = {{ $caCarte }};
-
         new Chart(document.getElementById('chartPaiements'), {
             type: 'doughnut',
             data: {
                 labels: ['Espèces', 'Mobile Money', 'Carte'],
                 datasets: [{
-                    data: [caEspeces, caMobile, caCarte],
-                    backgroundColor: ['#16A34A', '#2563EB', '#7C3AED'],
+                    data: [caEspeces, caMobile],
+                    backgroundColor: ['#16A34A', '#2563EB'],
                     borderWidth: 0,
                     hoverOffset: 6,
                 }]

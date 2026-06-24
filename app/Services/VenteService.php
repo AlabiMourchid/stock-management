@@ -18,15 +18,17 @@ class VenteService
         string $modePaiement = 'especes',
         string $type = 'sur_place',
         float  $montantRecu = 0,
-        ?string $notes = null
+        ?string $notes = null,
+        float  $supplement = 0
     ): Commande {
-        return DB::transaction(function () use ($lignes, $userId, $modePaiement, $type, $montantRecu, $notes) {
+        return DB::transaction(function () use ($lignes, $userId, $modePaiement, $type, $montantRecu, $notes, $supplement) {
             $commande = Commande::create([
                 'user_id'        => $userId,
                 'statut'         => 'en_preparation',
                 'type'           => $type,
                 'mode_paiement'  => $modePaiement,
                 'total_ttc'      => 0,
+                'supplement'     => $supplement,
                 'montant_recu'   => $montantRecu ?: null,
                 'notes'          => $notes,
             ]);
@@ -48,11 +50,12 @@ class VenteService
                 ]);
             }
 
-            $monnaie = $montantRecu > 0 ? max(0, $montantRecu - $total) : null;
+            $totalFinal = $total + $supplement;
+            $monnaie    = $montantRecu > 0 ? max(0, $montantRecu - $totalFinal) : null;
 
             $commande->update([
-                'total_ttc'       => $total,
-                'monnaie_rendue'  => $monnaie,
+                'total_ttc'      => $totalFinal,
+                'monnaie_rendue' => $monnaie,
             ]);
 
             return $commande->load('lignes.menu');

@@ -26,9 +26,17 @@ class VenteController extends Controller
     {
         $query = Commande::with(['user', 'lignes.menu'])->latest();
 
-        // Filtre date (défaut = aujourd'hui)
-        $date = $request->date ?? today()->toDateString();
-        $query->whereDate('created_at', $date);
+        // Plage de dates (défaut = aujourd'hui)
+        $dateDebut = $request->date_debut ?? today()->toDateString();
+        $dateFin   = $request->date_fin   ?? today()->toDateString();
+
+        // S'assurer que date_fin >= date_debut
+        if ($dateFin < $dateDebut) {
+            $dateFin = $dateDebut;
+        }
+
+        $query->whereDate('created_at', '>=', $dateDebut)
+              ->whereDate('created_at', '<=', $dateFin);
 
         // Filtre statut
         if ($request->filled('statut')) {
@@ -47,7 +55,7 @@ class VenteController extends Controller
 
         $commandes = $query->paginate(20)->withQueryString();
 
-        return view('ventes.index', compact('commandes'));
+        return view('ventes.index', compact('commandes', 'dateDebut', 'dateFin'));
     }
 
     public function cloture()
@@ -67,12 +75,13 @@ class VenteController extends Controller
     {
         $validated = $request->validate([
             'lignes'            => 'required|array|min:1',
-            'lignes.*.menu_id' => 'required|exists:menus,id',
-            'lignes.*.quantite'   => 'required|integer|min:1',
+            'lignes.*.menu_id'  => 'required|exists:menus,id',
+            'lignes.*.quantite' => 'required|integer|min:1',
             'mode_paiement'     => 'required|in:especes,mobile_money,carte',
             'type'              => 'required|in:sur_place,emporter',
             'montant_recu'      => 'nullable|numeric|min:0',
             'notes'             => 'nullable|string|max:500',
+            'supplement'        => 'nullable|numeric|min:0',
         ]);
 
         $commande = $this->venteService->creerCommande(
@@ -81,7 +90,8 @@ class VenteController extends Controller
             $validated['mode_paiement'],
             $validated['type'],
             (float) ($validated['montant_recu'] ?? 0),
-            $validated['notes'] ?? null
+            $validated['notes'] ?? null,
+            (float) ($validated['supplement'] ?? 0)
         );
 
         return response()->json([

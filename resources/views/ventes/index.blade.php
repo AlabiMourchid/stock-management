@@ -10,11 +10,16 @@
         <div class="card-body py-3">
             <form method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3 col-sm-6">
-                    <label class="form-label mb-1">Date</label>
-                    <input type="date" name="date" class="form-control form-control-sm"
-                           value="{{ request('date', today()->toDateString()) }}">
+                    <label class="form-label mb-1">Du</label>
+                    <input type="date" name="date_debut" class="form-control form-control-sm"
+                           value="{{ request('date_debut', today()->toDateString()) }}">
                 </div>
-                <div class="col-md-2 col-sm-6">
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label mb-1">Au</label>
+                    <input type="date" name="date_fin" class="form-control form-control-sm"
+                           value="{{ request('date_fin', today()->toDateString()) }}">
+                </div>
+                <div class="col-md-2 col-sm-6" style="max-width:140px">
                     <label class="form-label mb-1">Statut</label>
                     <select name="statut" class="form-select form-select-sm">
                         <option value="">Tous</option>
@@ -39,12 +44,12 @@
                         <option value="emporter"  {{ request('type') === 'emporter'  ? 'selected' : '' }}>À emporter</option>
                     </select>
                 </div>
-                <div class="col-md-3 col-sm-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-amira btn-sm flex-grow-1">
+                <div class="col-md-12 col-sm-12 d-flex justify-content-center gap-2">
+                    <button type="submit" class="btn btn-amira btn-sm px-3">
                         <i class="bi bi-search me-1"></i>Filtrer
                     </button>
                     <a href="{{ route('ventes.index') }}" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-x-lg"></i>
+                        <i class="bi bi-x-lg me-1"></i> Annuler
                     </a>
                 </div>
             </form>
@@ -60,7 +65,7 @@
     @endphp
 
     <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon orange"><i class="bi bi-currency-exchange"></i></div>
                 <div class="stat-info">
@@ -69,7 +74,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon blue"><i class="bi bi-receipt-cutoff"></i></div>
                 <div class="stat-info">
@@ -78,7 +83,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon green"><i class="bi bi-graph-up"></i></div>
                 <div class="stat-info">
@@ -87,7 +92,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-6 col-lg-3">
             <div class="stat-card">
                 <div class="stat-icon red"><i class="bi bi-x-circle"></i></div>
                 <div class="stat-info">
@@ -102,12 +107,17 @@
     <div class="card">
         <div class="card-header">
         <span class="card-title">
-            Commandes —
+            Commandes ({{ $commandes->total() }})
             <span class="text-muted fw-normal" style="font-size:13px">
-                {{ \Carbon\Carbon::parse(request('date', today()))->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                @if($dateDebut === $dateFin)
+                    {{ \Carbon\Carbon::parse($dateDebut)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}
+                @else
+                    {{ \Carbon\Carbon::parse($dateDebut)->locale('fr')->isoFormat('D MMM YYYY') }}
+                    →
+                    {{ \Carbon\Carbon::parse($dateFin)->locale('fr')->isoFormat('D MMM YYYY') }}
+                @endif
             </span>
         </span>
-            <span style="font-size:12px;color:var(--text-muted)">{{ $commandes->total() }} résultat(s)</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -115,9 +125,8 @@
                     <thead>
                     <tr>
                         <th>N° Commande</th>
-                        <th>Heure</th>
+                        <th>Date & Heure</th>
                         <th>Articles</th>
-                        <th>Type</th>
                         <th>Paiement</th>
                         <th>Total</th>
                         <th>Statut</th>
@@ -135,7 +144,7 @@
                                 </a>
                             </td>
                             <td style="color:var(--text-muted)">
-                                {{ $cmd->created_at->format('H:i') }}
+                                {{ $cmd->created_at->format('d/m/y à H:i') }}
                             </td>
                             <td>
                                 <div style="max-width:200px">
@@ -152,13 +161,6 @@
                                 </div>
                             </td>
                             <td>
-                                @if($cmd->type === 'sur_place')
-                                    <span style="font-size:12px">Sur place</span>
-                                @else
-                                    <span style="font-size:12px">À emporter</span>
-                                @endif
-                            </td>
-                            <td>
                                 @php
                                     $pmIcons = [
                                         'especes'      => ['Espèces'],
@@ -169,9 +171,16 @@
                                 @endphp
                                 <span style="font-size:12px"> {{ $label }}</span>
                             </td>
-                            <td style="font-weight:700;white-space:nowrap">
-                                {{ number_format($cmd->total_ttc, 0, ',', ' ') }}
-                                <small style="font-weight:400;color:var(--text-muted)">FCFA</small>
+                            <td style="white-space:nowrap">
+                                <div style="font-weight:700">
+                                    {{ number_format($cmd->total_ttc, 0, ',', ' ') }}
+                                    <small style="font-weight:400;color:var(--text-muted)">FCFA</small>
+                                </div>
+                                @if($cmd->supplement > 0)
+                                    <div style="font-size:11px;color:var(--text-muted)">
+                                        dont suppl. {{ number_format($cmd->supplement, 0, ',', ' ') }} FCFA
+                                    </div>
+                                @endif
                             </td>
                             <td>
                             <span class="badge-status badge-{{ str_replace('_', '-', $cmd->statut) }}">

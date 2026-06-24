@@ -55,7 +55,20 @@
                 </div>
 
                 <div class="order-ticket-footer">
-                    {{-- Total --}}
+                    {{-- Sous-total articles --}}
+                    <div class="order-total" id="ligneArticles" style="display:none;font-size:13px;opacity:.75">
+                        <span>Articles</span>
+                        <span id="sousTotal">0 FCFA</span>
+                    </div>
+
+                    {{-- Supplément optionnel --}}
+                    <div class="mb-2">
+                        <label class="form-label mb-1" style="font-size:12px">Supplément (optionnel)</label>
+                        <input type="number" id="supplement" class="form-control form-control-sm"
+                               placeholder="0" min="0" step="100" oninput="renderPanier()">
+                    </div>
+
+                    {{-- Total final --}}
                     <div class="order-total">
                         <span>Total</span>
                         <span id="totalAffiche">0 FCFA</span>
@@ -198,7 +211,8 @@
 
         function viderPanier() {
             panier = {};
-            document.getElementById('montantRecu').value = 0;
+            document.getElementById('montantRecu').value = '';
+            document.getElementById('supplement').value  = '';
             renderPanier();
         }
 
@@ -210,6 +224,8 @@
                 body.innerHTML = `<div class="text-center text-muted py-4" id="panierVide">
             <i class="bi bi-cart-x fs-2 d-block mb-2 opacity-50"></i>Aucun article</div>`;
                 document.getElementById('totalAffiche').textContent = '0 FCFA';
+                document.getElementById('sousTotal').textContent    = '0 FCFA';
+                document.getElementById('ligneArticles').style.display = 'none';
                 document.getElementById('btnValider').disabled = true;
                 document.getElementById('monnaieAffiche').textContent = '';
                 updateFab();
@@ -217,11 +233,11 @@
             }
 
             let html = '';
-            let total = 0;
+            let sousTot = 0;
             keys.forEach(id => {
                 const item = panier[id];
                 const ss   = item.prix * item.qte;
-                total += ss;
+                sousTot += ss;
                 html += `<div class="order-line">
             <span class="order-line-qty">${item.qte}</span>
             <span class="order-line-name">${item.nom}</span>
@@ -234,7 +250,12 @@
         </div>`;
             });
 
+            const supplement = parseFloat(document.getElementById('supplement').value) || 0;
+            const total      = sousTot + supplement;
+
             body.innerHTML = html;
+            document.getElementById('sousTotal').textContent    = sousTot.toLocaleString('fr') + ' FCFA';
+            document.getElementById('ligneArticles').style.display = supplement > 0 ? '' : 'none';
             document.getElementById('totalAffiche').textContent = total.toLocaleString('fr') + ' FCFA';
             document.getElementById('btnValider').disabled = false;
             calculerMonnaie(total);
@@ -242,10 +263,14 @@
         }
 
         function calculerMonnaie(total) {
-            total = total ?? parseInt(document.getElementById('totalAffiche').textContent.replace(/\D/g,''));
-            const recu = parseFloat(document.getElementById('montantRecu').value) || 0;
+            if (total === undefined) {
+                const supplement = parseFloat(document.getElementById('supplement').value) || 0;
+                const sousTot    = Object.values(panier).reduce((s, i) => s + i.prix * i.qte, 0);
+                total = sousTot + supplement;
+            }
+            const recu    = parseFloat(document.getElementById('montantRecu').value) || 0;
             const monnaie = recu - total;
-            const el = document.getElementById('monnaieAffiche');
+            const el      = document.getElementById('monnaieAffiche');
             if (recu > 0) {
                 el.textContent = monnaie >= 0
                     ? `✓ Monnaie à rendre : ${monnaie.toLocaleString('fr')} FCFA`
@@ -258,14 +283,15 @@
 
         async function validerCommande() {
             const lignes = Object.values(panier).map(item => ({
-                menu_id: item.id,
-                quantite:   item.qte,
+                menu_id:  item.id,
+                quantite: item.qte,
             }));
             if (!lignes.length) return;
 
             const modePaiement = document.querySelector('[name="mode_paiement"]:checked').value;
             const type         = document.querySelector('[name="type_cmd"]:checked').value;
             const montantRecu  = parseFloat(document.getElementById('montantRecu').value) || 0;
+            const supplement   = parseFloat(document.getElementById('supplement').value)  || 0;
             const notes        = document.getElementById('notesCommande').value;
 
             document.getElementById('spinnerOverlay').classList.remove('d-none');
@@ -277,7 +303,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ lignes, mode_paiement: modePaiement, type, montant_recu: montantRecu, notes }),
+                    body: JSON.stringify({ lignes, mode_paiement: modePaiement, type, montant_recu: montantRecu, supplement, notes }),
                 });
 
                 const data = await resp.json();

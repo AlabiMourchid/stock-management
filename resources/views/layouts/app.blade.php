@@ -97,6 +97,10 @@
                 <i class="bi bi-boxes"></i>
                 <span>Matières premières</span>
             </a>
+            <a href="{{ route('admin.expenses') }}" class="nav-item {{ request()->routeIs('admin.expenses*') ? 'active' : '' }}">
+                <i class="bi bi-wallet"></i>
+                <span>Dépenses</span>
+            </a>
             <a href="{{ route('admin.utilisateurs') }}" class="nav-item {{ request()->routeIs('admin.utilisateurs*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i>
                 <span>Utilisateurs</span>

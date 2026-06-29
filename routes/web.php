@@ -2,11 +2,15 @@
 // routes/web.php — VERSION FINALE COMPLÈTE
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    DashboardController, StockController, VenteController,
-    CaisseController, CuisineController, RapportController,
-    AdminController, AuthController,
-};
+use App\Http\Controllers\{DashboardController,
+    DepenseController,
+    StockController,
+    VenteController,
+    CaisseController,
+    CuisineController,
+    RapportController,
+    AdminController,
+    AuthController};
 
 // Auth
 Route::middleware('guest')->group(function () {
@@ -83,5 +87,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/fournisseurs',                [AdminController::class, 'fournisseursStore'])->name('fournisseurs.store');
         Route::put('/fournisseurs/{fournisseur}',   [AdminController::class, 'fournisseursUpdate'])->name('fournisseurs.update');
         Route::delete('/fournisseurs/{fournisseur}',[AdminController::class, 'fournisseursDestroy'])->name('fournisseurs.destroy');
+
+
+        Route::get('/expenses', [DepenseController::class, 'index'])->name('expenses');
+        Route::post('/expenses', [DepenseController::class, 'store'])->name('expenses.store');
+        Route::put('/expenses/{depense}',  [DepenseController::class, 'update'])->name('expenses.update');
+        Route::delete('/expenses/{depense}',  [DepenseController::class, 'destroy'])->name('expenses.destroy');
     });
 });

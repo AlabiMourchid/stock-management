@@ -27,11 +27,11 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label mb-1">Produit</label>
-                    <select name="produit_stock_id" class="form-select form-select-sm">
+                    <select name="produit_id" class="form-select form-select-sm">
                         <option value="">Tous</option>
                         @foreach(\App\Models\Produit::actif()->orderBy('nom')->get() as $p)
                             <option
-                                value="{{ $p->id }}" {{ request('produit_stock_id')==$p->id?'selected':'' }}>{{ $p->nom }}</option>
+                                value="{{ $p->id }}" {{ request('produit_id')==$p->id?'selected':'' }}>{{ $p->nom }}</option>
                         @endforeach
                     </select>
                 </div>

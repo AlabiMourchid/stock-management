@@ -3,6 +3,42 @@
 @section('page-title','Saisie fin de service — Sorties stock')
 
 @section('content')
+
+    @php $estAujourdhui = $dateService === today()->toDateString(); @endphp
+
+    {{-- ===== Sélecteur de date de service ===== --}}
+    <div class="card mb-4">
+        <div class="card-body py-3">
+            <form method="GET" action="{{ route('stock.fin-service') }}" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-1" style="font-size:12px">Service à saisir</label>
+                    <input type="date" name="date_service" class="form-control form-control-sm"
+                           value="{{ $dateService }}" max="{{ today()->toDateString() }}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-amira btn-sm"><i class="bi bi-search me-1"></i>Charger</button>
+                </div>
+                @if(!$estAujourdhui)
+                    <div class="col-auto">
+                        <a href="{{ route('stock.fin-service') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Revenir à aujourd'hui
+                        </a>
+                    </div>
+                @endif
+            </form>
+        </div>
+    </div>
+
+    @unless($estAujourdhui)
+        <div class="alert alert-warning d-flex align-items-start gap-2 mb-4" style="font-size:13px">
+            <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+            <div>
+                Vous saisissez un <strong>service antérieur</strong> ({{ \Carbon\Carbon::parse($dateService)->locale('fr')->isoFormat('dddd D MMMM YYYY') }}).
+                Les quantités seront retirées du <strong>stock actuel réel</strong> affiché ci-dessous, pensez à ne saisir que ce qui n'a pas déjà été enregistré, mais le mouvement sera bien daté du {{ \Carbon\Carbon::parse($dateService)->locale('fr')->isoFormat('D MMM') }}.
+            </div>
+        </div>
+    @endunless
+
     <div class="row g-4">
         <div class="col-xl-8">
             <div class="card">
@@ -14,11 +50,16 @@
                             <strong>sorties</strong> ce service. Laisser 0 pour les produits non touchés.
                         </div>
                     </div>
-                    <span
-                        style="font-size:12px;color:var(--text-muted)">{{ now()->locale('fr')->isoFormat('dddd D MMM') }}</span>
+                    <span style="font-size:12px;color:var(--text-muted)">
+                        {{ \Carbon\Carbon::parse($dateService)->locale('fr')->isoFormat('dddd D MMM') }}
+                        @unless($estAujourdhui)
+                            <span class="badge" style="background:var(--warning-light);color:var(--warning);font-size:11px;font-weight:600;margin-left:4px">Antérieur</span>
+                        @endunless
+                    </span>
                 </div>
                 <form method="POST" action="{{ route('stock.fin-service.store') }}" id="formFinService">
                     @csrf
+                    <input type="hidden" name="date_service" value="{{ $dateService }}">
                     <div class="card-body p-0">
                         <table class="table table-amira mb-0">
                             <thead>
@@ -34,7 +75,7 @@
                             @foreach($produits as $i => $p)
                                 <tr class="produit-row" data-cat="{{ $p->categorie_nom ?? 'Autre' }}">
                                     <td>
-                                        <input type="hidden" name="lignes[{{ $i }}][produit_stock_id]"
+                                        <input type="hidden" name="lignes[{{ $i }}][produit_id]"
                                                value="{{ $p->id }}">
                                         <div class="d-flex align-items-center gap-2">
                                             <span style="font-size:20px">{{ $p->emoji }}</span>

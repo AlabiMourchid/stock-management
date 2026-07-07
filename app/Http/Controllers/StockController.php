@@ -34,24 +34,26 @@ class StockController extends Controller
         return view('stock.index', compact('produits', 'categories', 'fournisseurs'));
     }
 
-    public function saisieFinService()
+    public function saisieFinService(Request $request)
     {
         Gate::authorize('admin');
+        $dateService = $request->date_service ?? today()->toDateString();
         $produits = Produit::actif()->orderBy('nom')->get();
-        return view('stock.fin-service', compact('produits'));
+        return view('stock.fin-service', compact('produits', 'dateService'));
     }
 
     public function enregistrerFinService(Request $request)
     {
         Gate::authorize('admin');
         $validated = $request->validate([
+            'date_service'          => 'required|date',
             'lignes'                => 'required|array',
             'lignes.*.produit_id'   => 'required|exists:produits,id',
             'lignes.*.quantite'     => 'required|numeric|min:0',
             'lignes.*.motif'        => 'nullable|string|max:200',
         ]);
 
-        $this->stockService->sortieGroupee($validated['lignes'], auth()->id());
+        $this->stockService->sortieGroupee($validated['lignes'], auth()->id(), $validated['date_service']);
 
         return redirect()->route('stock.index')->with('success', 'Sorties de fin de service enregistrées.');
     }
@@ -79,11 +81,23 @@ class StockController extends Controller
         return back()->with('success', "Entrée de {$validated['quantite']} {$produit->unite}(s) enregistrée pour « {$produit->nom} ».");
     }
 
-    public function mouvement()
+    public function mouvement(Request $request)
     {
-        $mouvements = StockMouvement::with(['produit', 'user'])
-            ->latest()
-            ->paginate(25);
+        $debut = $request->debut ?? today()->toDateString();
+        $fin   = $request->fin   ?? today()->toDateString();
+
+        $query = StockMouvement::with(['produit', 'user'])
+            ->whereBetween('date_mouvement', [$debut, $fin]);
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('produit_id')) {
+            $query->where('produit_id', $request->produit_id);
+        }
+
+        $mouvements = $query->latest()->paginate(25)->withQueryString();
 
         return view('stock.mouvement', compact('mouvements'));
     }

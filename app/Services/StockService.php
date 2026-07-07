@@ -93,10 +93,10 @@ class StockService
      * Saisie groupée de fin de service (plusieurs produits en une fois).
      * $lignes = [['produit_id' => 1, 'quantite' => 3.5, 'motif' => '...'], ...]
      */
-    public function sortieGroupee(array $lignes, int $userId): array
+    public function sortieGroupee(array $lignes, int $userId, ?string $date = null): array
     {
         $mouvements = [];
-        DB::transaction(function () use ($lignes, $userId, &$mouvements) {
+        DB::transaction(function () use ($lignes, $userId, $date, &$mouvements) {
             foreach ($lignes as $ligne) {
                 if (empty($ligne['quantite']) || $ligne['quantite'] <= 0) continue;
                 $produit = Produit::findOrFail($ligne['produit_id']);
@@ -104,7 +104,8 @@ class StockService
                     $produit,
                     (float) $ligne['quantite'],
                     $userId,
-                    $ligne['motif'] ?? 'Fin de service'
+                    $ligne['motif'] ?? 'Fin de service',
+                    $date
                 );
             }
         });

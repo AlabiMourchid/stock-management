@@ -90,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
 
 
         Route::get('/expenses', [DepenseController::class, 'index'])->name('expenses');
+
         Route::post('/expenses', [DepenseController::class, 'store'])->name('expenses.store');
         Route::put('/expenses/{depense}',  [DepenseController::class, 'update'])->name('expenses.update');
         Route::delete('/expenses/{depense}',  [DepenseController::class, 'destroy'])->name('expenses.destroy');

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 use App\Models\Commande;
+use App\Models\Depense;
 use App\Models\LigneCommande;
 use App\Models\Perte;
 use App\Models\Produit;
@@ -22,6 +23,39 @@ class StatistiqueService
         return Commande::whereBetween('created_at', [$debut, $fin])
             ->whereNotIn('statut', ['annule'])
             ->sum('total_ttc');
+    }
+
+    /**
+     * Analyse financière d'une période : CA, charges fixes/variables, marge nette
+     * et seuil de rentabilité (CA nécessaire pour couvrir les charges fixes,
+     * compte tenu du taux de marge sur coûts variables).
+     */
+    public function analyseFinanciere(string $debut, string $fin): array
+    {
+        $caPeriode = $this->caPeriode($debut . ' 00:00:00', $fin . ' 23:59:59');
+
+        $totalFixe     = Depense::fixe()->whereBetween('date_depense', [$debut, $fin])->sum('montant');
+        $totalVariable = Depense::variable()->whereBetween('date_depense', [$debut, $fin])->sum('montant');
+        $totalDepenses = $totalFixe + $totalVariable;
+
+        $margeNette    = $caPeriode - $totalDepenses;
+        $tauxMargeNette = $caPeriode > 0 ? round(($margeNette / $caPeriode) * 100, 1) : 0;
+
+        // Taux de marge sur coûts variables = (CA - charges variables) / CA
+        $tauxMargeVariable = $caPeriode > 0 ? ($caPeriode - $totalVariable) / $caPeriode : 0;
+        $seuilRentabilite  = $tauxMargeVariable > 0 ? $totalFixe / $tauxMargeVariable : 0;
+        $seuilAtteint      = $seuilRentabilite > 0 ? $caPeriode >= $seuilRentabilite : true;
+
+        return [
+            'ca_periode'          => $caPeriode,
+            'total_fixe'          => $totalFixe,
+            'total_variable'      => $totalVariable,
+            'total_depenses'      => $totalDepenses,
+            'marge_nette'         => $margeNette,
+            'taux_marge_nette'    => $tauxMargeNette,
+            'seuil_rentabilite'   => $seuilRentabilite,
+            'seuil_atteint'       => $seuilAtteint,
+        ];
     }
 
     /** Évolution des ventes : 7 derniers jours */

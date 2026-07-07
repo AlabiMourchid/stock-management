@@ -13,7 +13,7 @@
                 <div class="stat-icon orange"><i class="bi bi-currency-exchange"></i></div>
                 <div class="stat-info">
                     <div class="stat-label">CA Aujourd'hui</div>
-                    <div class="stat-value">{{ number_format($kpis['ca_jour'], 0, ',', ' ') }}&nbsp;<small style="font-size:14px;font-weight:600;color:var(--text-muted)">FCFA</small></div>
+                    <div class="stat-value">{{ number_format($kpis['ca_jour'], 0, ',', ' ') }}&nbsp;<small class="fsz-14 fw-600 c-muted">FCFA</small></div>
                     @if($kpis['tendance_ca'] != 0)
                         <div class="stat-trend {{ $kpis['tendance_ca'] >= 0 ? 'up' : 'down' }}">
                             <i class="bi bi-arrow-{{ $kpis['tendance_ca'] >= 0 ? 'up' : 'down' }}-short"></i>
@@ -54,7 +54,7 @@
                 <div class="stat-icon amber"><i class="bi bi-trash3"></i></div>
                 <div class="stat-info">
                     <div class="stat-label">Pertes</div>
-                    <div class="stat-value">{{ number_format($kpis['cout_pertes_semaine'], 0, ',', ' ') }}&nbsp;<small style="font-size:14px;font-weight:600;color:var(--text-muted)">FCFA</small></div>
+                    <div class="stat-value">{{ number_format($kpis['cout_pertes_semaine'], 0, ',', ' ') }}&nbsp;<small class="fsz-14 fw-600 c-muted">FCFA</small></div>
                     <div class="stat-sub">Coût matière perdue</div>
                 </div>
             </div>
@@ -71,7 +71,7 @@
                     <a href="{{ route('rapports.index') }}" class="btn btn-sm btn-light">Voir rapports <i class="bi bi-arrow-right"></i></a>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container" style="height:240px">
+                    <div class="chart-container chart-h-240">
                         <canvas id="chartVentes"></canvas>
                     </div>
                 </div>
@@ -87,16 +87,16 @@
                 </div>
                 <div class="card-body p-0">
                     @forelse($alertes as $p)
-                        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom" style="border-color:var(--border-color)!important">
+                        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom b-subtle">
                             <div class="d-flex align-items-center gap-2">
                                 <div>
-                                    <div style="font-size:13px;font-weight:600">{{ $p->nom }}</div>
+                                    <div class="fsz-13 fw-600">{{ $p->nom }}</div>
                                 </div>
                             </div>
                             <span class="stock-badge stock-critique">{{ $p->stock_actuel }} {{ $p->unite }}</span>
                         </div>
                     @empty
-                        <div class="text-center py-4 text-muted" style="font-size:13px">
+                        <div class="text-center py-4 text-muted fsz-13">
                             <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
                             Tous les stocks sont OK
                         </div>
@@ -129,11 +129,11 @@
                             <tbody>
                             @forelse($dernieres as $cmd)
                                 <tr>
-                                    <td><a href="{{ route('ventes.recu', $cmd) }}" style="font-weight:600;color:var(--amira-orange);text-decoration:none">{{ $cmd->numero }}</a></td>
-                                    <td style="color:var(--text-muted)">{{ $cmd->created_at->format('H:i') }}</td>
-                                    <td style="font-weight:600">{{ number_format($cmd->total_ttc, 0, ',', ' ') }} FCFA</td>
+                                    <td><a href="{{ route('ventes.recu', $cmd) }}" class="link-order-number">{{ $cmd->numero }}</a></td>
+                                    <td class="c-muted">{{ $cmd->created_at->format('H:i') }}</td>
+                                    <td class="fw-600">{{ number_format($cmd->total_ttc, 0, ',', ' ') }} FCFA</td>
                                     <td>
-                                        @php $icons = ['especes' => 'cash', 'mobile_money' => 'phone', 'carte' => 'credit-card']; @endphp
+                                        @php $icons = ['especes' => 'cash', 'mobile_money' => 'phone']; @endphp
                                         <i class="bi bi-{{ $icons[$cmd->mode_paiement] ?? 'cash' }}"></i>
                                         {{ ucfirst(str_replace('_', ' ', $cmd->mode_paiement)) }}
                                     </td>
@@ -160,16 +160,16 @@
                                 <i class="bi bi-cart3 fs-5"></i> Prise de commande
                             </a>
                         @endcan
-                            {{-- <a href="{{ route('cuisine.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 justify-content-center" style="border-radius:8px">
+                            {{-- <a href="{{ route('cuisine.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 justify-content-center rounded-md"
                             <i class="bi bi-fire fs-5"></i> Écran cuisine
                         </a>--}}
                         @can('manage-stock')
-                            <a href="{{ route('stock.fin-service') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 justify-content-center" style="border-radius:8px">
+                            <a href="{{ route('stock.fin-service') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 justify-content-center rounded-md"
                                 <i class="bi bi-arrow-left-right fs-5"></i> Saisie fin de service
                             </a>
                         @endcan
                         @can('view-reports')
-                            <a href="{{ route('rapports.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 justify-content-center" style="border-radius:8px">
+                            <a href="{{ route('rapports.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 justify-content-center rounded-md"
                                 <i class="bi bi-bar-chart-line fs-5"></i> Statistiques & rapports
                             </a>
                         @endcan

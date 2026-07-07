@@ -15,8 +15,8 @@ class RapportController extends Controller
     {
         Gate::authorize('view-reports');
 
-        $debut = $request->date_debut ?? today()->toDateString();
-        $fin   = $request->date_fin   ?? today()->toDateString();
+        $debut = $request->debut ?? today()->toDateString();
+        $fin   = $request->fin   ?? today()->toDateString();
 
         if ($fin < $debut) {
             $fin = $debut;
@@ -24,11 +24,23 @@ class RapportController extends Controller
 
         $topProduits = $this->stats->topProduits($debut . ' 00:00:00', $fin . ' 23:59:59');
         $evolution   = $this->stats->evolutionVentes7j();
-        $caPeriode   = $this->stats->caPeriode($debut . ' 00:00:00', $fin . ' 23:59:59');
+        $analyse     = $this->stats->analyseFinanciere($debut, $fin);
+        $caPeriode         = $analyse['ca_periode'];
+        $totalFixe         = $analyse['total_fixe'];
+        $totalVariable     = $analyse['total_variable'];
+        $totalDepenses     = $analyse['total_depenses'];
+        $margeNette        = $analyse['marge_nette'];
+        $tauxMargeNette    = $analyse['taux_marge_nette'];
+        $seuilRentabilite  = $analyse['seuil_rentabilite'];
+        $seuilAtteint      = $analyse['seuil_atteint'];
 
-        return view('rapports.index', compact('topProduits', 'evolution', 'caPeriode', 'debut', 'fin'));
+        return view('rapports.index', compact(
+            'topProduits', 'evolution', 'caPeriode',
+            'totalFixe', 'totalVariable', 'totalDepenses', 'margeNette', 'tauxMargeNette',
+            'seuilRentabilite', 'seuilAtteint',
+            'debut', 'fin'
+        ));
     }
-
     public function pertes(Request $request)
     {
         Gate::authorize('view-reports');

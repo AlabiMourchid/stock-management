@@ -12,29 +12,34 @@ use Illuminate\Http\Request;
 
 class CaisseController extends Controller
 {
-    public function __construct(private CaisseService $caisseService) {}
-
-    public function cloture()
+    public function __construct(private CaisseService $caisseService)
     {
-        $session   = ClotureCaisse::whereDate('date_service', today())->first();
-        $commandes = Commande::whereNotIn('statut', ['annule'])->whereDate('created_at', today())->get();
-        return view('ventes.cloture', compact('session', 'commandes'));
+    }
+
+    public function cloture(Request $request)
+    {
+        $dateService = $request->date_service ?? today()->toDateString();
+        $session = ClotureCaisse::whereDate('date_service', $dateService)->first();
+        $estCloture = $session?->est_cloturee ?? false;
+        $commandes = Commande::with(['lignes.menu', 'user'])->whereNotIn('statut', ['annule'])->whereDate('created_at', $dateService)->get();
+        return view('ventes.cloture', compact('session', 'commandes', 'estCloture', 'dateService'));
     }
 
     public function effectuerCloture(Request $request)
     {
         $request->validate([
-            'fond_reel'    => 'required|numeric|min:0',
+            'fond_reel' => 'required|numeric|min:0',
             'observations' => 'nullable|string|max:1000',
+            'date_service' => 'required|date',
         ]);
 
-        $session = $this->caisseService->ouvrirSession(auth()->id());
-        $session = $this->caisseService->cloturerSession(
-            $session,
-            $request->fond_reel,
-            $request->observations
+        $session = $this->caisseService->ouvrirSession(
+            auth()->id(), (float)($request->fond_ouverture ?? 0), $request->date_service
         );
-
-        return redirect()->route('dashboard')->with('success', 'Caisse clôturée. CA du jour : ' . number_format($session->ca_total, 0, ',', ' ') . ' FCFA');
+        $session = $this->caisseService->cloturerSession(
+            $session, $request->fond_reel, $request->observations, $request->date_service
+        );
+        return redirect()->route('dashboard')
+            ->with('success', 'Caisse clôturée — CA : ' . number_format($session->ca_total, 0, ',', ' ') . ' FCFA');
     }
 }

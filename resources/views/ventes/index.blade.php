@@ -165,7 +165,6 @@
                                     $pmIcons = [
                                         'especes'      => ['Espèces'],
                                         'mobile_money' => ['Mobile'],
-                                        'carte'        => ['Carte'],
                                     ];
                                     [$label] = $pmIcons[$cmd->mode_paiement] ?? [ $cmd->mode_paiement];
                                 @endphp

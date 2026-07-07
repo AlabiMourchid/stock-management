@@ -6,31 +6,53 @@
 @section('content')
 
     @php
-        $date       = today()->locale('fr')->isoFormat('dddd D MMMM YYYY');
+        $date       = \Carbon\Carbon::parse($dateService)->locale('fr')->isoFormat('dddd D MMMM YYYY');
+        $estAujourdhui = $dateService === today()->toDateString();
         $estCloture = $session?->est_cloturee ?? false;
 
-        // Calculs en temps réel depuis les commandes du jour
+        // Calculs en temps réel depuis les commandes du service sélectionné
         $caEspeces  = $commandes->where('mode_paiement', 'especes')->sum('total_ttc');
         $caMobile   = $commandes->where('mode_paiement', 'mobile_money')->sum('total_ttc');
-        $caCarte    = $commandes->where('mode_paiement', 'carte')->sum('total_ttc');
-        $caTotal    = $caEspeces + $caMobile + $caCarte;
+        $caTotal    = $caEspeces + $caMobile;
         $nbCmds     = $commandes->count();
         $panier     = $nbCmds > 0 ? $caTotal / $nbCmds : 0;
 
         $repartition = [
-            ['label' => 'Espèces',      'val' => $caEspeces, 'pct' => $caTotal > 0 ? round($caEspeces / $caTotal * 100) : 0, 'color' => '#16A34A'],
-            ['label' => 'Mobile Money', 'val' => $caMobile,  'pct' => $caTotal > 0 ? round($caMobile  / $caTotal * 100) : 0, 'color' => '#2563EB'],
-            ['label' => 'Carte',        'val' => $caCarte,   'pct' => $caTotal > 0 ? round($caCarte   / $caTotal * 100) : 0, 'color' => '#7C3AED'],
+            ['label' => 'Espèces',      'val' => $caEspeces, 'pct' => $caTotal > 0 ? round($caEspeces / $caTotal * 100) : 0, 'bar' => 'bg-var-success'],
+            ['label' => 'Mobile Money', 'val' => $caMobile,  'pct' => $caTotal > 0 ? round($caMobile  / $caTotal * 100) : 0, 'bar' => 'bg-var-info'],
         ];
     @endphp
 
+    {{-- ===== Sélecteur de date de service ===== --}}
+    <div class="card mb-4">
+        <div class="card-body py-3">
+            <form method="GET" action="{{ route('caisse.cloture') }}" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-1 fsz-12">Service à clôturer</label>
+                    <input type="date" name="date_service" class="form-control form-control-sm"
+                           value="{{ $dateService }}" max="{{ today()->toDateString() }}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-amira btn-sm"><i class="bi bi-search me-1"></i>Charger</button>
+                </div>
+                @if(!$estAujourdhui)
+                    <div class="col-auto">
+                        <a href="{{ route('caisse.cloture') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Revenir à aujourd'hui
+                        </a>
+                    </div>
+                @endif
+            </form>
+        </div>
+    </div>
+
     {{-- ===== Bandeau si déjà clôturé ===== --}}
     @if($estCloture)
-        <div class="alert alert-success d-flex align-items-center gap-3 mb-4" style="border-radius:12px">
+        <div class="alert alert-success d-flex align-items-center gap-3 mb-4 rounded-lg">
             <i class="bi bi-check-circle-fill fs-3"></i>
             <div>
-                <div style="font-weight:700;font-size:15px">Caisse clôturée</div>
-                <div style="font-size:13px">
+                <div class="fw-bold fsz-15">Caisse clôturée</div>
+                <div class="fsz-13">
                     Clôturée le {{ $session->clôturee_a?->locale('fr')->isoFormat('D MMM YYYY à HH:mm') }}
                     par {{ $session->user->name }}
                 </div>
@@ -41,8 +63,15 @@
     {{-- ===== En-tête date ===== --}}
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h5 class="mb-0" style="font-weight:700">Service du {{ $date }}</h5>
-            <p class="text-muted mb-0" style="font-size:13px">
+            <h5 class="mb-0 fw-bold">
+                Service du {{ $date }}
+                @unless($estAujourdhui)
+                    <span class="badge badge-service-anterior">
+                        <i class="bi bi-clock-history me-1"></i>Service antérieur
+                    </span>
+                @endunless
+            </h5>
+            <p class="text-muted mb-0 fsz-13">
                 <i class="bi bi-clock me-1"></i>Récapitulatif en temps réel
             </p>
         </div>
@@ -61,9 +90,9 @@
                        <div class="stat-icon orange"><i class="bi bi-currency-exchange"></i></div>
                        <div class="stat-info">
                            <div class="stat-label">CA Total</div>
-                           <div class="stat-value" style="font-size:19px">
+                           <div class="stat-value fsz-19">
                                {{ number_format($caTotal, 0, ',', ' ') }}
-                               <small style="font-size:11px;color:var(--text-muted)">FCFA</small>
+                               <small class="fsz-11 c-muted">FCFA</small>
                            </div>
                        </div>
                    </div>
@@ -73,7 +102,7 @@
                        <div class="stat-icon blue"><i class="bi bi-receipt-cutoff"></i></div>
                        <div class="stat-info">
                            <div class="stat-label">Commandes</div>
-                           <div class="stat-value" style="font-size:19px">{{ $nbCmds }}</div>
+                           <div class="stat-value fsz-19">{{ $nbCmds }}</div>
                        </div>
                    </div>
                </div>
@@ -82,9 +111,9 @@
                        <div class="stat-icon green"><i class="bi bi-graph-up"></i></div>
                        <div class="stat-info">
                            <div class="stat-label">Panier moyen</div>
-                           <div class="stat-value" style="font-size:19px">
+                           <div class="stat-value fsz-19">
                                {{ number_format($panier, 0, ',', ' ') }}
-                               <small style="font-size:11px;color:var(--text-muted)">F</small>
+                               <small class="fsz-11 c-muted">F</small>
                            </div>
                        </div>
                    </div>
@@ -94,7 +123,7 @@
                        <div class="stat-icon red"><i class="bi bi-x-circle"></i></div>
                        <div class="stat-info">
                            <div class="stat-label">Annulées</div>
-                           <div class="stat-value" style="font-size:19px">
+                           <div class="stat-value fsz-19">
                                {{ $commandes->where('statut', 'annule')->count() }}
                            </div>
                        </div>
@@ -116,15 +145,15 @@
                     @foreach($repartition as $r)
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span style="font-size:13px;font-weight:600">{{ $r['label'] }}</span>
-                                <span style="font-size:13px;font-weight:700">
+                                <span class="fsz-13 fw-600">{{ $r['label'] }}</span>
+                                <span class="fsz-13 fw-bold">
                             {{ number_format($r['val'], 0, ',', ' ') }} FCFA
-                            <span style="font-size:11px;color:var(--text-muted);">({{ $r['pct'] }}%)</span>
+                            <span class="fsz-11 c-muted">({{ $r['pct'] }}%)</span>
                         </span>
                             </div>
-                            <div class="progress" style="height:8px;border-radius:6px;background:var(--border-color)">
-                                <div class="progress-bar" role="progressbar"
-                                     style="width:{{ $r['pct'] }}%;background:{{ $r['color'] }};border-radius:6px;transition:width .6s ease">
+                            <div class="progress progress-sm">
+                                <div class="progress-bar {{ $r['bar'] }} progress-bar-transition" role="progressbar"
+                                     style="width:{{ $r['pct'] }}%">
                                 </div>
                             </div>
                         </div>
@@ -142,15 +171,15 @@
                         $topProduits = collect();
                         foreach($commandes->whereNotIn('statut', ['annule']) as $cmd) {
                             foreach($cmd->lignes as $ligne) {
-                                $key_ligne = $ligne->produit_id;
+                                $key_ligne = $ligne->menu_id;
                                 $topProduits = $topProduits->map(function ($item, $key){
                                     if ($key == $key_ligne) {
                                         $item['qte'] += $ligne->quantite;
                                         $item['ca']  += $ligne->sous_total;
                                     } else {
                                         $item[$key] = [
-                                            'nom'   => $ligne->produit->nom,
-                                            'emoji' => $ligne->produit->emoji,
+                                            'nom'   => $ligne->menu->nom,
+                                            'emoji' => $ligne->menu->emoji,
                                             'qte'   => $ligne->quantite,
                                             'ca'    => $ligne->sous_total,
                                         ];
@@ -163,7 +192,7 @@
                     @endphp
 
                     @if($topProduits->isEmpty())
-                        <div class="text-center py-4 text-muted" style="font-size:13px">
+                        <div class="text-center py-4 text-muted fsz-13">
                             Aucune vente enregistrée
                         </div>
                     @else
@@ -179,17 +208,17 @@
                             <tbody>
                             @foreach($topProduits->values() as $i => $p)
                                 <tr>
-                                    <td style="font-weight:700;color:var(--text-muted)">{{ $i + 1 }}</td>
+                                    <td class="fw-bold c-muted">{{ $i + 1 }}</td>
                                     <td>
-                                        <span style="font-size:18px">{{ $p['emoji'] }}</span>
-                                        <span style="font-weight:600;margin-left:6px">{{ $p['nom'] }}</span>
+                                        <span class="fsz-18">{{ $p['emoji'] }}</span>
+                                        <span class="fw-600 ms-2">{{ $p['nom'] }}</span>
                                     </td>
                                     <td class="text-center">
-                                <span class="badge" style="background:var(--amira-orange-light);color:var(--amira-orange);font-size:13px;font-weight:700">
+                                <span class="badge badge-brand-soft">
                                     {{ $p['qte'] }}
                                 </span>
                                     </td>
-                                    <td class="text-end" style="font-weight:700">
+                                    <td class="text-end fw-bold">
                                         {{ number_format($p['ca'], 0, ',', ' ') }} FCFA
                                     </td>
                                 </tr>
@@ -204,7 +233,7 @@
 
         {{-- ===== Colonne droite : Formulaire clôture ===== --}}
         <div class="col-xl-4">
-            <div class="card" style="position:sticky;top:calc(var(--topbar-h) + 16px)">
+            <div class="card card-sticky">
 
                 <div class="card-header">
                 <span class="card-title">
@@ -218,33 +247,33 @@
                     @if($estCloture)
                         {{-- Mode lecture --}}
                         <div class="mb-3">
-                            <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:var(--border-color)!important">
-                                <span style="font-size:13px;color:var(--text-muted)">Fond ouverture</span>
-                                <span style="font-weight:600">{{ number_format($session->fond_caisse_ouverture, 0, ',', ' ') }} FCFA</span>
+                            <div class="d-flex justify-content-between py-2 border-bottom b-subtle">
+                                <span class="fsz-13 c-muted">Fond ouverture</span>
+                                <span class="fw-600">{{ number_format($session->fond_caisse_ouverture, 0, ',', ' ') }} FCFA</span>
                             </div>
-                            <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:var(--border-color)!important">
-                                <span style="font-size:13px;color:var(--text-muted)">Fond clôture (réel)</span>
-                                <span style="font-weight:600">{{ number_format($session->fond_caisse_cloture, 0, ',', ' ') }} FCFA</span>
+                            <div class="d-flex justify-content-between py-2 border-bottom b-subtle">
+                                <span class="fsz-13 c-muted">Fond clôture (réel)</span>
+                                <span class="fw-600">{{ number_format($session->fond_caisse_cloture, 0, ',', ' ') }} FCFA</span>
                             </div>
-                            <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:var(--border-color)!important">
-                                <span style="font-size:13px;color:var(--text-muted)">CA total</span>
-                                <span style="font-weight:700;color:var(--amira-orange)">{{ number_format($session->ca_total, 0, ',', ' ') }} FCFA</span>
+                            <div class="d-flex justify-content-between py-2 border-bottom b-subtle">
+                                <span class="fsz-13 c-muted">CA total</span>
+                                <span class="fw-bold c-brand">{{ number_format($session->ca_total, 0, ',', ' ') }} FCFA</span>
                             </div>
                             <div class="d-flex justify-content-between py-2">
-                                <span style="font-size:13px;color:var(--text-muted)">Écart de caisse</span>
-                                <span style="font-weight:700;color:{{ $session->ecart_caisse >= 0 ? 'var(--success)' : 'var(--danger)' }}">
+                                <span class="fsz-13 c-muted">Écart de caisse</span>
+                                <span class="fw-bold {{ $session->ecart_caisse >= 0 ? 'c-success' : 'c-danger' }}">
                             {{ $session->ecart_caisse >= 0 ? '+' : '' }}{{ number_format($session->ecart_caisse, 0, ',', ' ') }} FCFA
                         </span>
                             </div>
                         </div>
 
                         @if($session->observations)
-                            <div class="p-3 rounded mb-3" style="background:var(--body-bg);font-size:13px">
+                            <div class="p-3 rounded mb-3 card-header-subtle fsz-13">
                                 <strong>Observations :</strong><br>{{ $session->observations }}
                             </div>
                         @endif
 
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary w-100" style="border-radius:8px">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary w-100 rounded-md">
                             <i class="bi bi-arrow-left me-1"></i>Retour au dashboard
                         </a>
 
@@ -252,16 +281,17 @@
                         {{-- Mode saisie --}}
                         <form method="POST" action="{{ route('caisse.cloture.store') }}" id="formCloture">
                             @csrf
+                            <input type="hidden" name="date_service" value="{{ $dateService }}">
 
                             {{-- Résumé CA attendu --}}
-                            <div class="p-3 rounded mb-4" style="background:var(--amira-orange-light);border:1px solid rgba(244,98,31,.2)">
-                                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--amira-orange-dark);margin-bottom:6px">
-                                    CA enregistré aujourd'hui
+                            <div class="p-3 rounded mb-4 ca-summary-box">
+                                <div class="fsz-11 fw-bold text-uppercase ls-06 mb-2 ca-summary-label">
+                                    CA enregistré {{ $estAujourdhui ? "aujourd'hui" : 'ce jour-là' }}
                                 </div>
-                                <div style="font-size:24px;font-weight:700;color:var(--amira-orange)">
+                                <div class="fsz-24 fw-bold c-brand">
                                     {{ number_format($caTotal, 0, ',', ' ') }} FCFA
                                 </div>
-                                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">
+                                <div class="fsz-12 c-muted mt-1">
                                     dont {{ number_format($caEspeces, 0, ',', ' ') }} FCFA en espèces
                                 </div>
                             </div>
@@ -284,10 +314,10 @@
                             </div>
 
                             {{-- Écart calculé en temps réel --}}
-                            <div class="p-3 rounded mb-4" style="background:var(--body-bg);border:1px solid var(--border-color)" id="zoneEcart">
-                                <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Écart de caisse calculé</div>
-                                <div style="font-size:20px;font-weight:700" id="ecartAffiche">—</div>
-                                <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="ecartExplication"></div>
+                            <div class="p-3 rounded mb-4 ecart-box" id="zoneEcart">
+                                <div class="fsz-12 c-muted mb-1">Écart de caisse calculé</div>
+                                <div class="fsz-20 fw-bold" id="ecartAffiche">—</div>
+                                <div class="fsz-11 c-muted mt-1" id="ecartExplication"></div>
                             </div>
 
                             <div class="mb-4">

@@ -4,10 +4,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Depense;
+use App\Services\StatistiqueService;
 use Illuminate\Http\Request;
 
 class DepenseController extends Controller
 {
+    public function __construct(private StatistiqueService $stats) {}
+
     public function index(Request $request)
     {
         $periode = $request->periode ?? 'jour';
@@ -32,10 +35,12 @@ class DepenseController extends Controller
             $query->where('categorie', $request->categorie);
         }
 
-        $depenses   = $query->get();
-        $total      = $depenses->sum('montant');
-        $parJour    = $depenses->groupBy(fn($d) => $d->date_depense->format('Y-m-d'))
-            ->map->sum('montant');
+        // Filtre type (fixe / variable)
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $expenses   = $query->get();
         $categories = Depense::select('categorie')
             ->whereNotNull('categorie')
             ->distinct()->pluck('categorie');
@@ -45,9 +50,21 @@ class DepenseController extends Controller
         $totalSemaine = Depense::semaine()->sum('montant');
         $totalMois    = Depense::mois()->sum('montant');
 
+        // Analyse financière (CA, charges fixes/variables, marge, seuil de rentabilité)
+        $analyse = $this->stats->analyseFinanciere($debut, $fin);
+        $caPeriode         = $analyse['ca_periode'];
+        $totalFixe         = $analyse['total_fixe'];
+        $totalVariable     = $analyse['total_variable'];
+        $margeNette        = $analyse['marge_nette'];
+        $tauxMargeNette    = $analyse['taux_marge_nette'];
+        $seuilRentabilite  = $analyse['seuil_rentabilite'];
+        $seuilAtteint      = $analyse['seuil_atteint'];
+
         return view('admin.depenses', compact(
-            'depenses', 'total', 'parJour', 'categories',
+            'expenses', 'categories',
             'totalJour', 'totalSemaine', 'totalMois',
+            'caPeriode', 'totalFixe', 'totalVariable', 'margeNette', 'tauxMargeNette',
+            'seuilRentabilite', 'seuilAtteint',
             'debut', 'fin', 'periode'
         ));
     }
@@ -55,6 +72,7 @@ class DepenseController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'type'          => 'required|in:fixe,variable',
             'libelle'       => 'required|string|max:200',
             'categorie'     => 'nullable|string|max:100',
             'montant'       => 'required|numeric|min:1',
@@ -72,6 +90,7 @@ class DepenseController extends Controller
     public function update(Request $request, Depense $depense)
     {
         $data = $request->validate([
+            'type'         => 'required|in:fixe,variable',
             'libelle'      => 'required|string|max:200',
             'categorie'    => 'nullable|string|max:100',
             'montant'      => 'required|numeric|min:1',

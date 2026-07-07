@@ -877,6 +877,235 @@ body {
     box-shadow: 0 0 0 3px rgba(244, 98, 31, .12);
 }
 
+/* ================================================================
+   Dépenses / Rapports / Clôture caisse / Dashboard
+   ================================================================ */
+
+/* ---------- Utilitaires texte ---------- */
+.fsz-10 { font-size: 10px; }
+.fsz-11 { font-size: 11px; }
+.fsz-12 { font-size: 12px; }
+.fsz-12-5 { font-size: 12.5px; }
+.fsz-13 { font-size: 13px; }
+.fsz-14 { font-size: 14px; }
+.fsz-15 { font-size: 15px; }
+.fsz-17 { font-size: 17px; }
+.fsz-18 { font-size: 18px; }
+.fsz-19 { font-size: 19px; }
+.fsz-20 { font-size: 20px; }
+.fsz-24 { font-size: 24px; }
+.fsz-26 { font-size: 26px; }
+.fsz-42 { font-size: 42px; }
+
+.fw-600 { font-weight: 600; }
+.ls-06 { letter-spacing: .06em; }
+
+.text-meta { font-size: 11px; color: var(--text-muted); }
+
+.c-muted { color: var(--text-muted); }
+.c-secondary { color: var(--text-secondary); }
+.c-brand { color: var(--amira-orange); }
+.c-info { color: var(--info); }
+.c-warning { color: var(--warning); }
+.c-success { color: var(--success); }
+.c-danger { color: var(--danger); }
+
+.bg-var-brand { background: var(--amira-orange); }
+.bg-var-info { background: var(--info); }
+.bg-var-warning { background: var(--warning); }
+.bg-var-success { background: var(--success); }
+.bg-var-danger { background: var(--danger); }
+
+.b-subtle { border-color: var(--border-color) !important; }
+.hr-plain { border-color: var(--border-color) !important; margin: 20px 0; }
+.rounded-md { border-radius: 8px !important; }
+.rounded-lg { border-radius: 12px !important; }
+
+/* ---------- Cartes sticky (formulaires latéraux) ---------- */
+.card-sticky {
+    position: sticky;
+    top: calc(var(--topbar-h) + 16px);
+}
+
+.card-header-subtle {
+    background: var(--body-bg);
+}
+
+.chart-h-240 {
+    height: 240px;
+}
+
+/* ---------- Analyse financière (mini-KPI CA / charges / marge) ---------- */
+.finance-kpi-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.finance-kpi-value {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.finance-kpi-unit {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.finance-margin-big {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+/* ---------- Résumé financier (lignes + barres) ---------- */
+.summary-row-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.summary-row-value {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.summary-row-value-lg {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.progress-xxs { height: 5px; border-radius: 4px; background: var(--border-color); }
+.progress-xs  { height: 7px; border-radius: 4px; }
+.progress-sm  { height: 8px; border-radius: 6px; }
+.progress-md  { height: 10px; border-radius: 6px; }
+.progress-lg  { height: 16px; border-radius: 8px; }
+
+.progress-bar-transition { transition: width .6s ease; }
+
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+/* ---------- Bandeau seuil de rentabilité ---------- */
+.threshold-box.is-positive {
+    background: var(--success-light);
+    border: 1px solid rgba(22, 163, 74, .2);
+}
+
+.threshold-box.is-negative {
+    background: var(--danger-light);
+    border: 1px solid rgba(220, 38, 38, .2);
+}
+
+/* ---------- Type de dépense (fixe / variable) ---------- */
+.type-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.type-icon.type-fixe, .type-chip.type-fixe, .day-total-chip.chip-fixe {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.type-icon.type-variable, .type-chip.type-variable, .day-total-chip.chip-variable {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.type-chip {
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.category-chip {
+    background: var(--border-color);
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.day-total-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.expense-amount {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--danger);
+    white-space: nowrap;
+}
+
+/* ---------- Rapport des pertes ---------- */
+.motif-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+    background: #6B7280;
+}
+
+.motif-perime         { background: var(--danger); }
+.motif-brulee          { background: #EA580C; }
+.motif-tombe           { background: var(--warning); }
+.motif-mauvaise_cuisson{ background: #7C3AED; }
+.motif-autre           { background: #6B7280; }
+
+.table-total-row {
+    background: var(--body-bg);
+}
+
+/* ---------- Clôture de caisse ---------- */
+.badge-service-anterior {
+    background: var(--warning-light);
+    color: var(--warning);
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+.ecart-box {
+    background: var(--body-bg);
+    border: 1px solid var(--border-color);
+}
+
+.ca-summary-box {
+    background: var(--amira-orange-light);
+    border: 1px solid rgba(244, 98, 31, .2);
+}
+
+.ca-summary-label {
+    color: var(--amira-orange-dark);
+}
+
+.badge-brand-soft {
+    background: var(--amira-orange-light);
+    color: var(--amira-orange);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.link-order-number {
+    font-weight: 600;
+    color: var(--amira-orange);
+    text-decoration: none;
+}
+
 /* ---------- Receipt print ---------- */
 @media print {
     .sidebar, .topbar, .flash-zone, .no-print {

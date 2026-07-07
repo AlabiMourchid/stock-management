@@ -77,7 +77,7 @@ class VenteController extends Controller
             'lignes'            => 'required|array|min:1',
             'lignes.*.menu_id'  => 'required|exists:menus,id',
             'lignes.*.quantite' => 'required|integer|min:1',
-            'mode_paiement'     => 'required|in:especes,mobile_money,carte',
+            'mode_paiement'     => 'required|in:especes,mobile_money',
             'type'              => 'required|in:sur_place,emporter',
             'montant_recu'      => 'nullable|numeric|min:0',
             'notes'             => 'nullable|string|max:500',

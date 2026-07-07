@@ -114,7 +114,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Matière première</label>
-                            <select name="produit_stock_id" id="entree-produit" class="form-select" required>
+                            <select name="produit_id" id="entree-produit" class="form-select" required>
                                 @foreach($produits as $p)
                                     <option value="{{ $p->id }}">{{ $p->emoji }} {{ $p->nom }}</option>
                                 @endforeach
@@ -123,15 +123,6 @@
                         <div class="mb-3">
                             <label class="form-label">Quantité <span id="entree-unite" class="text-muted fw-normal"></span></label>
                             <input type="number" name="quantite" class="form-control" min="0.01" step="0.01" required placeholder="0">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fournisseur <span class="text-muted fw-normal">(optionnel)</span></label>
-                            <select name="fournisseur_id" class="form-select">
-                                <option value="">— Aucun —</option>
-                                @foreach($fournisseurs as $f)
-                                    <option value="{{ $f->id }}">{{ $f->nom }}</option>
-                                @endforeach
-                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Date</label>
@@ -157,7 +148,7 @@
             <div class="modal-content">
                 <form method="POST" action="{{ route('stock.inventaire') }}">
                     @csrf
-                    <input type="hidden" name="produit_stock_id" id="inv-id">
+                    <input type="hidden" name="produit_id" id="inv-id">
                     <div class="modal-header">
                         <h5 class="modal-title"><i class="bi bi-pencil text-warning me-2"></i>Correction inventaire</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
